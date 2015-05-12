@@ -6,7 +6,7 @@
  */
 /*
   Plugin Name: Woocommerce Shipping Options
-  Plugin URI: http://wordpress.org/plugins/.../
+  Plugin URI: https://wordpress.org/plugins/woocommerce-shipping-options/
   Description: Add new shipping method where user can add extra information via html select options.
   Author: Taavi Aasver
   Version: 1.0
@@ -423,11 +423,15 @@ if (!class_exists('WC_Shipping_Options')) {
             
             function wcso_field_update_shipping_order_meta( $order_id, $posted ) {
                 global $woocommerce;
-                if (in_array($this->id, $posted['shipping_method'])) {
+                if (is_array($posted['shipping_method']) && in_array($this->id, $posted['shipping_method'])) {
                     if ( isset( $_POST['shipping_option'] ) && !empty( $_POST['shipping_option'] ) ) {
                         update_post_meta( $order_id, 'wcso_shipping_option', sanitize_text_field( $_POST['shipping_option'] ) );
                         $woocommerce->session->_chosen_shipping_option = sanitize_text_field( $_POST['shipping_option'] );
-                    } else if ($woocommerce->session->_chosen_shipping_option) { //visible  in cart, hidden in checkout
+                    }
+                } else { //visible  in cart, hidden in checkout
+                    $chosen_method = $woocommerce->session->get('chosen_shipping_methods');
+                    $chosen_option= $woocommerce->session->_chosen_shipping_option;
+                    if (is_array($chosen_method) && in_array($this->id, $chosen_method) && $chosen_option) {
                         update_post_meta( $order_id, 'wcso_shipping_option', $woocommerce->session->_chosen_shipping_option );
                     }
                 }
